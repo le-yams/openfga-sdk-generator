@@ -273,6 +273,79 @@ func Test{{appShortName}}ApiConfiguration(t *testing.T) {
 
 		info := httpmock.GetCallCountInfo()
 		numCalls := info[fmt.Sprintf("POST https://%s/oauth/token", configuration.Credentials.Config.ClientCredentialsApiTokenIssuer)]
+		if numCalls != 0 {
+			t.Fatalf("Expected no call to be made on default token endpoint, saw: %d", numCalls)
+		}
+		numCalls = info[fmt.Sprintf("POST %s", configuration.Credentials.Config.ClientCredentialsTokenEndpoint)]
+		if numCalls != 1 {
+			t.Fatalf("Expected call to get access token to be made exactly once, saw: %d", numCalls)
+		}
+		numCalls = info[fmt.Sprintf("GET %s://%s/stores/%s/authorization-models", configuration.ApiScheme, configuration.ApiHost, configuration.StoreId)]
+		if numCalls != 1 {
+			t.Fatalf("Expected call to get authorization models to be made exactly once, saw: %d", numCalls)
+		}
+	})
+
+	t.Run("should issue a network call to get the token using the configured token url", func(t *testing.T) {
+		configuration, err := NewConfiguration(Configuration{
+			ApiHost: "api.{{sampleApiDomain}}",
+			StoreId: "01GXSB9YR785C4FYS3C0RTG7B2",
+			Credentials: &credentials.Credentials{
+				Method: credentials.CredentialsMethodClientCredentials,
+				Config: &credentials.Config{
+					ClientCredentialsClientId:       "some-id",
+					ClientCredentialsClientSecret:   "some-secret",
+					ClientCredentialsApiAudience:    "some-audience",
+					ClientCredentialsApiTokenIssuer: "tokenissuer.{{sampleApiDomain}}",
+					ClientCredentialsTokenEndpoint:  "https://tokenissuer.{{sampleApiDomain}}/another/token/endpoint",
+				},
+			},
+		})
+		if err != nil {
+			t.Fatalf("%v", err)
+		}
+
+		apiClient := NewAPIClient(configuration)
+
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+		httpmock.RegisterResponder("GET", fmt.Sprintf("%s://%s/stores/%s/authorization-models", configuration.ApiScheme, configuration.ApiHost, configuration.StoreId),
+			func(req *http.Request) (*http.Response, error) {
+				resp, err := httpmock.NewJsonResponse(200, ReadAuthorizationModelsResponse{AuthorizationModels: []AuthorizationModel{
+					{
+						Id:              PtrString("01GXSA8YR785C4FYS3C0RTG7B1"),
+						TypeDefinitions: []TypeDefinition{},
+					},
+					{
+						Id:              PtrString("01GXSBM5PVYHCJNRNKXMB4QZTW"),
+						TypeDefinitions: []TypeDefinition{},
+					},
+				}})
+				if err != nil {
+					return httpmock.NewStringResponse(500, ""), nil
+				}
+				return resp, nil
+			},
+		)
+
+		httpmock.RegisterResponder("POST", configuration.Credentials.Config.ClientCredentialsTokenEndpoint,
+			func(req *http.Request) (*http.Response, error) {
+				resp, err := httpmock.NewJsonResponse(200, struct {
+					AccessToken string `json:"access_token"`
+				}{AccessToken: "abcde"})
+				if err != nil {
+					return httpmock.NewStringResponse(500, ""), nil
+				}
+				return resp, nil
+			},
+		)
+
+		if _, _, err = apiClient.{{appShortName}}Api.ReadAuthorizationModels(context.Background()).Execute(); err != nil {
+			t.Fatalf("%v", err)
+		}
+
+		info := httpmock.GetCallCountInfo()
+		numCalls := info[fmt.Sprintf("POST %s", configuration.Credentials.Config.ClientCredentialsTokenEndpoint)]
 		if numCalls != 1 {
 			t.Fatalf("Expected call to get access token to be made exactly once, saw: %d", numCalls)
 		}

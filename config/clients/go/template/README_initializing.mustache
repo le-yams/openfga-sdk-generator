@@ -74,6 +74,7 @@ func main() {
                 ClientCredentialsClientSecret:   os.Getenv("{{appUpperCaseName}}_CLIENT_SECRET"),
                 ClientCredentialsApiAudience:    os.Getenv("{{appUpperCaseName}}_API_AUDIENCE"),
                 ClientCredentialsApiTokenIssuer: os.Getenv("{{appUpperCaseName}}_API_TOKEN_ISSUER"),
+                ClientCredentialsApiTokenEndpoint: os.Getenv("{{appUpperCaseName}}_API_TOKEN_ENDPOINT"), // Optional, default is https://<ClientCredentialsApiTokenIssuer>/oauth/token
             },
         },
     })
