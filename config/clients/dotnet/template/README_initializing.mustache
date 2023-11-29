@@ -82,6 +82,7 @@ namespace Example {
                         Method = CredentialsMethod.ClientCredentials,
                         Config = new CredentialsConfig() {
                             ApiTokenIssuer = Environment.GetEnvironmentVariable("{{appUpperCaseName}}_API_TOKEN_ISSUER"),
+                            ApiTokenEndpoint = Environment.GetEnvironmentVariable("{{appUpperCaseName}}_API_TOKEN_ENDPOINT"), // Optional, default is https://<ApiTokenIssuer>/oauth/token
                             ApiAudience = Environment.GetEnvironmentVariable("{{appUpperCaseName}}_API_AUDIENCE"),
                             ClientId = Environment.GetEnvironmentVariable("{{appUpperCaseName}}_CLIENT_ID"),
                             ClientSecret = Environment.GetEnvironmentVariable("{{appUpperCaseName}}_CLIENT_SECRET"),

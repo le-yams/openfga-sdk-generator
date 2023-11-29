@@ -70,6 +70,7 @@ public class OAuth2Client {
     private AuthToken _authToken = new();
     private AuthRequestBody _authRequest { get; set; }
     private string _apiTokenIssuer { get; set; }
+    private string? _tokenEndpoint { get; set; }
 
     #endregion
 
@@ -92,6 +93,7 @@ public class OAuth2Client {
 
         this._httpClient = httpClient;
         this._apiTokenIssuer = credentialsConfig.Config.ApiTokenIssuer;
+        this._tokenEndpoint = credentialsConfig.Config.TokenEndpoint;
         this._authRequest = new AuthRequestBody() {
             ClientId = credentialsConfig.Config.ClientId,
             ClientSecret = credentialsConfig.Config.ClientSecret,
@@ -112,6 +114,11 @@ public class OAuth2Client {
             PathTemplate = "/oauth/token",
             Body = Utils.CreateJsonStringContent(this._authRequest)
         };
+        if (!string.IsNullOrWhiteSpace(this._tokenEndpoint)) {
+            var tokenUri = new Uri(this._tokenEndpoint);
+            requestBuilder.BasePath = $"{tokenUri.Scheme}://{tokenUri.Authority}";
+            requestBuilder.PathTemplate = tokenUri.AbsolutePath;
+        }
 
         var accessTokenResponse = await _httpClient.SendRequestAsync<AccessTokenResponse>(
             requestBuilder,
