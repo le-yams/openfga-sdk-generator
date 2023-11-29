@@ -14,12 +14,14 @@ import {
   FgaApiValidationError,
   FgaValidationError,
   {{appShortName}}Api,
+  UserConfigurationParams,
 } from "../index";
 import { CallResult } from "../common";
 import { GetDefaultRetryParams } from "../configuration";
 import { AuthCredentialsConfig } from "../credentials";
 import {
   baseConfig,
+  baseConfigCredentials,
   defaultConfiguration,
   {{appUpperCaseName}}_API_HOST,
   {{appUpperCaseName}}_API_TOKEN_ISSUER,
@@ -174,6 +176,33 @@ describe("{{appTitleCaseName}} SDK", function () {
       nocks.readAuthorizationModels(baseConfig.storeId!);
 
       const fgaApi = new {{appShortName}}Api(baseConfig);
+      expect(scope.isDone()).toBe(false);
+
+      await fgaApi.readAuthorizationModels();
+
+      expect(scope.isDone()).toBe(true);
+
+      nock.cleanAll();
+    });
+
+    it("should issue a network call to get the token on configured token endpoint", async () => {
+      const tokenEndpoint = `https://$\{{{appUpperCaseName}}_API_TOKEN_ISSUER}/another/endpoint/token`;
+      const scope = nocks.tokenExchangeForEndpoint(tokenEndpoint);
+
+      const config: UserConfigurationParams = {
+        ...baseConfig,
+        credentials: {
+          method: CredentialsMethod.ClientCredentials,
+          config: {
+            ...baseConfigCredentials.config,
+            tokenEndpoint : tokenEndpoint
+          }
+        }
+      };
+
+      nocks.readAuthorizationModels(config.storeId!);
+
+      const fgaApi = new {{appShortName}}Api(config);
       expect(scope.isDone()).toBe(false);
 
       await fgaApi.readAuthorizationModels();

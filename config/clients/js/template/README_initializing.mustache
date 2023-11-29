@@ -48,6 +48,7 @@ const fgaClient = new {{appShortName}}Client({
     method: CredentialsMethod.ClientCredentials,
     config: {
       apiTokenIssuer: {{appUpperCaseName}}_API_TOKEN_ISSUER,
+      apiTokenEndpoint: {{appUpperCaseName}}_API_TOKEN_ENDPOINT, // Optional, default is https://<apiTokenIssuer>/oauth/token
       apiAudience: {{appUpperCaseName}}_API_AUDIENCE,
       clientId: {{appUpperCaseName}}_CLIENT_ID,
       clientSecret: {{appUpperCaseName}}_CLIENT_SECRET,

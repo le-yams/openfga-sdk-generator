@@ -34,6 +34,17 @@ export const getNocks = ((nock: typeof Nock) => ({
       expires_in: expiresIn,
     });
   },
+  tokenExchangeForEndpoint: (
+    tokenEndpoint: string,
+    accessToken = "test-token",
+    expiresIn = 300,
+    statusCode = 200,
+  ) => {
+    return nock(tokenEndpoint).post("").reply(statusCode, {
+      access_token: accessToken,
+      expires_in: expiresIn,
+    });
+  },
   listStores: (
     basePath = defaultConfiguration.getBasePath(),
     response: ListStoresResponse = { stores: [{ id: "some-id", name: "some-name" }] },
