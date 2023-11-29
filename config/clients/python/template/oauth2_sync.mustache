@@ -36,6 +36,9 @@ class OAuth2Client:
         """
         configuration = self._credentials.configuration
         token_url = 'https://{}/oauth/token'.format(configuration.api_issuer)
+        if configuration.token_endpoint is not None and configuration.token_endpoint != '':
+            token_url = configuration.token_endpoint
+
         body = {
             'client_id': configuration.client_id,
             'client_secret': configuration.client_secret,

@@ -69,6 +69,7 @@ async def main():
             method='client_credentials',
             configuration=CredentialConfiguration(
                 api_issuer= {{appUpperCaseName}}_API_TOKEN_ISSUER,
+                token_endpoint= {{appUpperCaseName}}_API_TOKEN_ENDPOINT, // Optional, default is https://<api_issuer>/oauth/token
                 api_audience= {{appUpperCaseName}}_API_AUDIENCE,
                 client_id= {{appUpperCaseName}}_CLIENT_ID,
                 client_secret= {{appUpperCaseName}}_CLIENT_SECRET,
